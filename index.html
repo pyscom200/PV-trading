@@ -102,6 +102,14 @@
   .notice strong {
     color: #4a3a1a;
   }
+  .pv-badge {
+    display: inline-block;
+    background: var(--navy);
+    color: #ffffff;
+    font-weight: 600;
+    padding: 1px 8px;
+    border-radius: 4px;
+  }
   .notice-title {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
@@ -272,12 +280,12 @@
 
 <div class="wrap">
 
-  <div class="notice">
+ <div class="notice">
     <p class="notice-title">このページについて</p>
     <p>
-      PV値 ＝ <strong>(前日の高値＋安値＋終値) ÷ 3</strong>。当日の値動きがこのPV値に「触れたか」を毎朝集計しています。<br>
-      過去データの検証では、PV値に値が触れる現象自体は<strong>約77〜81%</strong>の高確率で発生しますが、<strong>勝った時に取れる値幅は、外れた時の逆行幅の2〜5分の1程度</strong>しかなく、スプレッドを含めた実質的な期待値はほとんどの組み合わせでマイナスでした。PV値は「値動きの目安」として参考にしつつ、これ単体を売買の根拠にするのはおすすめしません。
-    </p>
+      <span class="pv-badge">PV値</span> ＝ <strong>(前日の高値＋安値＋終値) ÷ 3</strong>。当日の値動きがこの<span class="pv-badge">PV値</span>に「触れたか」を毎朝集計しています。<br>
+      過去データの検証では、<span class="pv-badge">PV値</span>に値が触れる現象自体は<strong>約77〜81%</strong>の高確率で発生しますが、<strong>勝った時に取れる値幅は、外れた時の逆行幅の2〜5分の1程度</strong>しかなく、スプレッドを含めた実質的な期待値はほとんどの組み合わせでマイナスでした。<span class="pv-badge">PV値</span>は「値動きの目安」として参考にしつつ、これ単体を売買の根拠にするのはおすすめしません。<br><br>
+      <strong>このページに表示される数値は、あくまで過去の値動きから算出した単なる参考データであり、将来の利益や投資成果を保証するものではありません。</strong>ご利用は自己責任でお願いします。</p>
   </div>
 
   <div class="stats-row" id="stats-row"></div>
