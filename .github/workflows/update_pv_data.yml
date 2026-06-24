@@ -1,1 +1,38 @@
+name: 毎朝PV値を自動更新
 
+"on":
+  schedule:
+    # 日本時間 朝7:00 = UTC 前日22:00 (UTC+9なので-9時間)
+    - cron: "0 22 * * *"
+  workflow_dispatch: {}  # 手動実行ボタンも使えるようにする
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: リポジトリを取得
+        uses: actions/checkout@v4
+
+      - name: Pythonをセットアップ
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 必要なライブラリをインストール
+        run: pip install requests
+
+      - name: PV値データを取得してindex.htmlを更新
+        env:
+          TWELVEDATA_API_KEY: ${{ secrets.TWELVEDATA_API_KEY }}
+        run: python scripts/fetch_pv_data.py
+
+      - name: 変更があればコミットして公開
+        run: |
+          git config user.name "pv-bot"
+          git config user.email "pv-bot@users.noreply.github.com"
+          git add index.html pv_data.json
+          git diff --quiet --cached || git commit -m "PV値データを自動更新"
+          git push
