@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PV値ダッシュボード</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1c2430;
+    --ink-soft: #4a5568;
+    --paper: #f7f5f0;
+    --panel: #ffffff;
+    --line: #dcd8cd;
+    --navy: #1f3a5f;
+    --navy-deep: #142940;
+    --gold: #a8854f;
+    --gold-soft: #f1e8d6;
+    --go: #2f6f4f;
+    --go-bg: #e7f1ea;
+    --no: #8a8478;
+    --no-bg: #ececE6;
+    --buy: #2f6f4f;
+    --sell: #9a4332;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Noto Sans JP', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+  }
+
+  /* ===== Header ===== */
+  header {
+    background: linear-gradient(160deg, var(--navy-deep) 0%, var(--navy) 100%);
+    color: #f4f0e6;
+    padding: 36px 20px 30px;
+    margin-bottom: 28px;
+  }
+  .header-inner {
+    max-width: 980px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold-soft);
+    opacity: 0.8;
+    margin: 0 0 6px;
+  }
+  h1 {
+    font-family: 'Spectral', serif;
+    font-weight: 600;
+    font-size: 30px;
+    margin: 0;
+    letter-spacing: 0.01em;
+  }
+  .updated {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    color: #cfd6e0;
+    text-align: right;
+  }
+  .updated .dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #6fcf97;
+    margin-right: 6px;
+  }
+
+  /* ===== Notice ===== */
+  .notice {
+    background: var(--gold-soft);
+    border: 1px solid #ddc99a;
+    border-radius: 3px;
+    padding: 16px 20px;
+    margin-bottom: 28px;
+    font-size: 13.5px;
+    line-height: 1.8;
+    color: #5c4a26;
+  }
+  .notice strong {
+    color: #4a3a1a;
+  }
+  .notice-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #8a6d2e;
+    margin: 0 0 8px;
+    font-weight: 600;
+  }
+
+  /* ===== Summary stats ===== */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 16px 18px;
+  }
+  .stat-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 8px;
+  }
+  .stat-value {
+    font-family: 'Spectral', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--navy);
+    line-height: 1;
+  }
+  .stat-sub {
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    margin-top: 4px;
+  }
+
+  /* ===== Table section ===== */
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--navy);
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .card-grid {
+    display: grid;
+    gap: 10px;
+  }
+
+  .pv-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--no);
+    border-radius: 4px;
+    padding: 16px 20px;
+    display: grid;
+    grid-template-columns: 140px 1fr auto auto;
+    align-items: center;
+    gap: 18px;
+  }
+  .pv-card.touched { border-left-color: var(--go); }
+
+  .pv-symbol {
+    font-family: 'Spectral', serif;
+    font-weight: 600;
+    font-size: 17px;
+    color: var(--ink);
+  }
+  .pv-symbol .sub {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    color: var(--ink-soft);
+    font-weight: 400;
+    margin-top: 2px;
+  }
+
+  .pv-figures {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+  }
+  .fig label {
+    display: block;
+    font-size: 9.5px;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+    margin-bottom: 2px;
+  }
+  .fig .v { color: var(--ink); font-weight: 500; }
+  .fig.pv .v { color: var(--navy); font-weight: 600; }
+
+  .direction-pill {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    padding: 5px 12px;
+    border-radius: 20px;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .direction-pill.buy { background: var(--go-bg); color: var(--buy); }
+  .direction-pill.sell { background: #f3e6e1; color: var(--sell); }
+
+  .status-pill {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .status-pill.yes { background: var(--go-bg); color: var(--go); }
+  .status-pill.no { background: var(--no-bg); color: var(--no); }
+
+  @media (max-width: 760px) {
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .pv-card {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .pv-figures { grid-template-columns: repeat(2, 1fr); }
+    .header-inner { flex-direction: column; align-items: flex-start; }
+    .updated { text-align: left; }
+  }
+
+  footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    line-height: 1.8;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div>
+      <p class="eyebrow">Daily FX / Gold Reference</p>
+      <h1>PV値ダッシュボード</h1>
+    </div>
+    <div class="updated" id="updated-at">
+      <span class="dot"></span>読み込み中...
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="notice">
+    <p class="notice-title">このページについて</p>
+    <p>
+      PV値 ＝ <strong>(前日の高値＋安値＋終値) ÷ 3</strong>。当日の値動きがこのPV値に「触れたか」を毎朝集計しています。<br>
+      過去データの検証では、PV値に値が触れる現象自体は<strong>約77〜81%</strong>の高確率で発生しますが、<strong>勝った時に取れる値幅は、外れた時の逆行幅の2〜5分の1程度</strong>しかなく、スプレッドを含めた実質的な期待値はほとんどの組み合わせでマイナスでした。PV値は「値動きの目安」として参考にしつつ、これ単体を売買の根拠にするのはおすすめしません。
+    </p>
+  </div>
+
+  <div class="stats-row" id="stats-row"></div>
+
+  <div class="section-label">
+    <span>本日の状況</span>
+    <span id="symbol-count"></span>
+  </div>
+
+  <div class="card-grid" id="card-grid" style="margin-top:14px;"></div>
+
+  <footer>
+    データ提供: Twelve Data API ／ 表示時刻はニューヨーク時間基準で日付が切り替わります。<br>
+    このページの数値は自動取得した参考情報であり、投資判断の保証はできません。最終的な判断はご自身の責任で行ってください。
+  </footer>
+
+</div>
+
+<script>
+const EMBEDDED_DATA = {"updated_at": "2026-06-24T06:59:57.887837+00:00", "instruments": [{"date": "2026-06-24", "prev_date": "2026-06-23", "pv_value": 161.54869, "curr_open": 161.58135, "curr_high": 161.70917, "curr_low": 161.49775, "curr_close": 161.70607, "direction": "sell", "touched": true, "dist_from_open": 0.03266, "symbol": "USD/JPY", "label": "USD/JPY", "pip_size": 0.01, "dist_from_open_pips": 3.3}, {"date": "2026-06-24", "prev_date": "2026-06-23", "pv_value": 1.13989, "curr_open": 1.13819, "curr_high": 1.13848, "curr_low": 1.13603, "curr_close": 1.1361, "direction": "buy", "touched": false, "dist_from_open": 0.0017, "symbol": "EUR/USD", "label": "EUR/USD", "pip_size": 0.0001, "dist_from_open_pips": 17.0}, {"date": "2026-06-24", "prev_date": "2026-06-23", "pv_value": 1.32156, "curr_open": 1.3203, "curr_high": 1.32095, "curr_low": 1.3187, "curr_close": 1.31874, "direction": "buy", "touched": false, "dist_from_open": 0.00126, "symbol": "GBP/USD", "label": "GBP/USD", "pip_size": 0.0001, "dist_from_open_pips": 12.6}, {"date": "2026-06-24", "prev_date": "2026-06-23", "pv_value": 184.18246, "curr_open": 183.91128, "curr_high": 183.95308, "curr_low": 183.53702, "curr_close": 183.70643, "direction": "buy", "touched": false, "dist_from_open": 0.27118, "symbol": "EUR/JPY", "label": "EUR/JPY", "pip_size": 0.01, "dist_from_open_pips": 27.1}, {"date": "2026-06-24", "prev_date": "2026-06-23", "pv_value": 0.69436, "curr_open": 0.69161, "curr_high": 0.69235, "curr_low": 0.69018, "curr_close": 0.69062, "direction": "buy", "touched": false, "dist_from_open": 0.00275, "symbol": "AUD/USD", "label": "AUD/USD", "pip_size": 0.0001, "dist_from_open_pips": 27.5}, {"date": "2026-06-24", "prev_date": "2026-06-23", "pv_value": 0.80924, "curr_open": 0.80948, "curr_high": 0.81152, "curr_low": 0.8093, "curr_close": 0.81149, "direction": "sell", "touched": false, "dist_from_open": 0.00024, "symbol": "USD/CHF", "label": "USD/CHF", "pip_size": 0.0001, "dist_from_open_pips": 2.4}, {"date": "2026-06-24", "prev_date": "2026-06-23", "pv_value": 1.41927, "curr_open": 1.42097, "curr_high": 1.42243, "curr_low": 1.42002, "curr_close": 1.42234, "direction": "sell", "touched": false, "dist_from_open": 0.0017, "symbol": "USD/CAD", "label": "USD/CAD", "pip_size": 0.0001, "dist_from_open_pips": 17.0}, {"date": "2026-06-24", "prev_date": "2026-06-23", "pv_value": 0.56855, "curr_open": 0.56678, "curr_high": 0.56812, "curr_low": 0.56506, "curr_close": 0.56518, "direction": "buy", "touched": false, "dist_from_open": 0.00177, "symbol": "NZD/USD", "label": "NZD/USD", "pip_size": 0.0001, "dist_from_open_pips": 17.7}, {"date": "2026-06-24", "prev_date": "2026-06-23", "pv_value": 0.86233, "curr_open": 0.86207, "curr_high": 0.86249, "curr_low": 0.86088, "curr_close": 0.8614, "direction": "buy", "touched": true, "dist_from_open": 0.00026, "symbol": "EUR/GBP", "label": "EUR/GBP", "pip_size": 0.0001, "dist_from_open_pips": 2.6}, {"date": "2026-06-24", "prev_date": "2026-06-23", "pv_value": 0.92214, "curr_open": 0.92135, "curr_high": 0.92236, "curr_low": 0.92078, "curr_close": 0.9218, "direction": "buy", "touched": true, "dist_from_open": 0.00079, "symbol": "EUR/CHF", "label": "EUR/CHF", "pip_size": 0.0001, "dist_from_open_pips": 7.9}, {"date": "2026-06-24", "prev_date": "2026-06-23", "pv_value": 4132.82123, "curr_open": 4109.93157, "curr_high": 4114.71835, "curr_low": 4050.56143, "curr_close": 4087.34717, "direction": "buy", "touched": false, "dist_from_open": 22.88966, "symbol": "XAU/USD", "label": "GOLD (XAU/USD)", "pip_size": 0.01, "dist_from_open_pips": 2289.0}], "errors": []};
+
+function loadData() {
+  render(EMBEDDED_DATA);
+}
+
+function formatPrice(v, pip) {
+  const decimals = pip === 0.01 ? 2 : (pip === 0.0001 ? 4 : 2);
+  return Number(v).toFixed(v > 1000 ? 1 : decimals);
+}
+
+function render(data) {
+  const instruments = data.instruments || [];
+
+  // ヘッダー更新時刻
+  const updatedEl = document.getElementById('updated-at');
+  if (data.updated_at) {
+    const d = new Date(data.updated_at);
+    const jst = d.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+    updatedEl.innerHTML = '<span class="dot"></span>最終更新（日本時間）: ' + jst;
+  }
+
+  // サマリー統計
+  const total = instruments.length;
+  const touchedCount = instruments.filter(i => i.touched).length;
+  const buyCount = instruments.filter(i => i.direction === 'buy').length;
+  const sellCount = instruments.filter(i => i.direction === 'sell').length;
+  const rate = total ? Math.round((touchedCount/total)*1000)/10 : 0;
+
+  const statsRow = document.getElementById('stats-row');
+  statsRow.innerHTML = `
+    <div class="stat-card">
+      <p class="stat-label">対象銘柄</p>
+      <p class="stat-value">${total}</p>
+      <p class="stat-sub">FX 10ペア + GOLD</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-label">本日 通過済み</p>
+      <p class="stat-value">${touchedCount}<span style="font-size:15px;color:var(--ink-soft);"> / ${total}</span></p>
+      <p class="stat-sub">通過率 ${rate}%</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-label">買い方向</p>
+      <p class="stat-value" style="color:var(--buy);">${buyCount}</p>
+      <p class="stat-sub">始値がPV値より下</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-label">売り方向</p>
+      <p class="stat-value" style="color:var(--sell);">${sellCount}</p>
+      <p class="stat-sub">始値がPV値より上</p>
+    </div>
+  `;
+
+  document.getElementById('symbol-count').textContent = instruments.length + ' 件表示中';
+
+  // カード一覧
+  const grid = document.getElementById('card-grid');
+  grid.innerHTML = instruments.map(inst => {
+    const pip = inst.pip_size;
+    const dirLabel = inst.direction === 'buy' ? '買い方向' : (inst.direction === 'sell' ? '売り方向' : '中立');
+    const dirClass = inst.direction === 'buy' ? 'buy' : 'sell';
+    return `
+    <div class="pv-card ${inst.touched ? 'touched' : ''}">
+      <div class="pv-symbol">
+        ${inst.label}
+        <span class="sub">${inst.date}</span>
+      </div>
+      <div class="pv-figures">
+        <div class="fig pv">
+          <label>前日PV値</label>
+          <span class="v">${formatPrice(inst.pv_value, pip)}</span>
+        </div>
+        <div class="fig">
+          <label>本日 始値</label>
+          <span class="v">${formatPrice(inst.curr_open, pip)}</span>
+        </div>
+        <div class="fig">
+          <label>本日 高値</label>
+          <span class="v">${formatPrice(inst.curr_high, pip)}</span>
+        </div>
+        <div class="fig">
+          <label>本日 安値</label>
+          <span class="v">${formatPrice(inst.curr_low, pip)}</span>
+        </div>
+      </div>
+      <span class="direction-pill ${dirClass}">${dirLabel}</span>
+      <span class="status-pill ${inst.touched ? 'yes' : 'no'}">${inst.touched ? '通過済み' : '未到達'}</span>
+    </div>
+    `;
+  }).join('');
+}
+
+loadData();
+</script>
+
+</body>
+</html>
