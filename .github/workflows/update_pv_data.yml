@@ -1,9 +1,9 @@
-name: PV値を1時間おきに自動更新
+name: PV値を30分おきに自動更新
 
 "on":
   schedule:
-    # 1時間おきに実行(毎時0分)
-    - cron: "0 * * * *"
+    # 30分おきに実行(毎時0分・30分)
+    - cron: "*/30 * * * *"
   workflow_dispatch: {}  # 手動実行ボタンも使えるようにする
 
 permissions:
