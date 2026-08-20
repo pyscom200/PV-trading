@@ -27,6 +27,8 @@ jobs:
       - name: PV値データを取得してindex.htmlを更新
         env:
           TWELVEDATA_API_KEY: ${{ secrets.TWELVEDATA_API_KEY }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
         run: python scripts/fetch_pv_data.py
 
       - name: 変更があればコミットして公開
@@ -34,5 +36,6 @@ jobs:
           git config user.name "pv-bot"
           git config user.email "pv-bot@users.noreply.github.com"
           git add index.html pv_data.json
+          if [ -f ma_alert_state.json ]; then git add ma_alert_state.json; fi
           git diff --quiet --cached || git commit -m "PV値データを自動更新"
           git push
